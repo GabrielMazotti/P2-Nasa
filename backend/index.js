@@ -6,7 +6,7 @@ require("dotenv").config()
 const app = express()
 app.use(cors())
 
-const LIMITE_FOTOS = 15
+const LIMITE_FOTOS = 10
 
 app.get('/search', async (req, res) => {
   const termo = req.query.termo
