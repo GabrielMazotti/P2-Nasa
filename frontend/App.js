@@ -1,6 +1,32 @@
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, TextInput, Button } from "react-native";
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, TextInput, FlatList } from "react-native";
+import { useState } from 'react';
 
 export default function App() {
+
+  const [busca, setBusca] = useState('')
+  const [fotos, setFotos] = useState([])
+  const anoAtual = new Date().getFullYear();
+
+
+  const buscar = async () => {
+    if (busca === '') return
+    const resposta = await fetch(`http://localhost:3000/search?termo=${busca}`)
+    const dados = await resposta.json()
+
+    const resultados = dados.items || []
+    setFotos(resultados)
+  }
+
+  const buscarAno = async (ano) => {
+    const resposta = await fetch(`http://localhost:3000/search-year?ano=${ano}`)
+    const dados = await resposta.json()
+
+    const resultados = dados.items || []
+    setFotos(resultados)
+
+  }
+
+
   return (
     <ScrollView style={styles.main}>
 
@@ -9,13 +35,13 @@ export default function App() {
         {/* HEADER */}
         <View style={styles.header}>
           <Image
-            source={{ uri: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" }}
+            source={require('./assets/NASA_logo.svg')}
             style={styles.logo}
           />
           <Text style={styles.headerTitulo}>NASA Explorer</Text>
         </View>
 
-        <Text style={styles.sectionTitulo}>Fotos do Dia</Text>
+        <Text style={styles.fotosDiaTitulo}>Fotos do Dia</Text>
 
         {/* FOTOS */}
         <ScrollView
@@ -37,12 +63,14 @@ export default function App() {
         {/* BUSCA */}
         <View style={styles.buscar}>
           <TextInput
-            placeholder="Digite o que deseja buscar"
+            placeholder='Digite o que deseja buscar (exemplos: moon, earth etc)'
             style={{ borderWidth: 1, padding: 10, marginTop: 20 }}
+            value={busca}
+            onChangeText={setBusca}
           />
 
-           <TouchableOpacity style={styles.botaoBuscar}>
-            <Text style={{color:"white"}}>Buscar</Text>
+          <TouchableOpacity style={styles.botaoBuscar} onPress={buscar}>
+            <Text style={{ color: "white" }}>Buscar</Text>
           </TouchableOpacity>
         </View>
 
@@ -50,39 +78,49 @@ export default function App() {
         <View style={styles.filtro}>
           <View style={styles.botoesAno}>
             {["2020", "2021", "2022", "2023", "2024"].map((ano) => (
-              <TouchableOpacity key={ano} style={styles.botaoAno}>
-                <Text style={styles.filtroAnoTexto}>{ano}</Text>
+              <TouchableOpacity key={ano} style={styles.botaoAno} onPress={() => buscarAno(ano)}>
+                <Text style={{color:"white"}}>{ano}</Text>
               </TouchableOpacity>
             ))}
           </View>
-          <TouchableOpacity style={styles.botaoAnoAtual}>
-            <Text style={{textAlign:"center"}}>2025</Text>
+          <TouchableOpacity style={styles.botaoAnoAtual} onPress={() => buscarAno(anoAtual)}>
+            <Text style={{ textAlign: "center", color:"white" }}>{anoAtual}</Text>
           </TouchableOpacity>
         </View>
 
-        {/* DETALHES DAS FOTOS */}
-        <View style={styles.fotos}>
-         <View style={styles.cardFotos}>
-            <Text style={styles.titulo}>Titulo</Text>
-              <Image
-                source={{ uri: "https://reactnative.dev/docs/assets/p_cat2.png" }}
-                style={{ width: 150, height: 100, borderRadius: 10 }}
-              />
-              <Text style={styles.titulo}>Descricao</Text>
-            </View>
+        {/* FOTOS */}
+        <FlatList
+          data={fotos}
+          scrollEnabled={false}
+          numColumns={2}
+          style={{ width: '100%' }}
+          contentContainerStyle={{ flex:1,justifyContent: 'center', alignItems: 'center', paddingBottom: 40 }}
+          keyExtractor={(item, index) => item.data?.[0]?.nasa_id || index.toString()}
+          renderItem={({ item }) => {
+            const imagem = item.links ? item.links[0].href : null
+
+            if (!imagem) return null
+
+            return (
               <View style={styles.cardFotos}>
-            <Text style={styles.titulo}>Titulo</Text>
-              <Image
-                source={{ uri: "https://reactnative.dev/docs/assets/p_cat2.png" }}
-                style={{ width: 150, height: 300, borderRadius: 10 }}
-              />
-              <Text style={styles.titulo}>Descricao</Text>
-            </View>
-          </View>
+                <Text style={styles.titulo}>{item.data[0].title}</Text>
+                <Image
+                  source={{ uri: imagem }}
+                  style={{ width: 300, height: 300, borderRadius: 10 }}
+                />
+                {item.data[0].description && (
+                  <Text style={styles.titulo}>{item.data[0].description}</Text>
+                )}            </View>
+            )
+          }}
+        />
+
+
+
 
         {/* DESENVOLVEDORES */}
         <View style={{ padding: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", textAlign:"center"}}>Desenvolvedores</Text>
+          <Text style={{ fontSize: 20, fontWeight: "bold", textAlign: "center" }}>Desenvolvedores</Text>
 
           <View style={{ marginTop: 20, alignItems: "center" }}>
             <Image
@@ -128,7 +166,7 @@ const styles = StyleSheet.create({
   },
 
   /* SEÇÕES */
-  sectionTitulo: {
+  fotosDiaTitulo: {
     fontSize: 20,
     fontWeight: "600",
     marginTop: 20,
@@ -201,25 +239,22 @@ const styles = StyleSheet.create({
   botaoAno: {
     width: "15%",
     padding: 12,
-    backgroundColor: "#e6e6e6",
+    backgroundColor:"#007bff" ,
     borderRadius: 10,
     alignItems: "center",
   },
 
-  anoText: {
-    fontSize: 15,
-    fontWeight: "500",
-    textAlign: "center",
-  },
+
 
   botaoAnoAtual: {
     width: "100%",
-    backgroundColor: "#e6e6e6",
+    backgroundColor: "#007bff",
     padding: 12,
     borderRadius: 10,
     marginTop: 15,
     textAlign: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    color: "white"
   },
 
   /* FOTOS*/
@@ -230,11 +265,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 20,
   },
-  cardFotos: {
+    cardFotos: {
     marginBottom: 40,
-    alignItems: 'center'
+    marginRight:40,
+    alignItems: 'center',
   },
-   titulo: {
+  titulo: {
     marginTop: 10,
     fontSize: 16,
     width: 300,
