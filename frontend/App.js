@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, TextInput, FlatList } from "react-native";
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, TextInput, FlatList, Linking} from "react-native";
 import { useState } from 'react';
 
 export default function App() {
@@ -8,11 +8,11 @@ export default function App() {
   const anoAtual = new Date().getFullYear();
 
 
+
   const buscar = async () => {
     if (busca === '') return
     const resposta = await fetch(`http://localhost:3000/search?termo=${busca}`)
     const dados = await resposta.json()
-
     const resultados = dados.items || []
     setFotos(resultados)
   }
@@ -41,13 +41,13 @@ export default function App() {
           <Text style={styles.headerTitulo}>NASA Explorer</Text>
         </View>
 
-        <Text style={styles.fotosDiaTitulo}>Fotos do Dia</Text>
 
-        {/* FOTOS */}
-        <ScrollView
+      {/* FOTOS DO DIA */}
+    <Text style={styles.fotosDiaTitulo}>Fotos do Dia</Text>
+      <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.scrollFotos}
+          style={styles.fotosDiaTitulo}
         >
           {[1, 2, 3].map((i) => (
             <View key={i} style={styles.cardFotosDia}>
@@ -79,12 +79,12 @@ export default function App() {
           <View style={styles.botoesAno}>
             {["2020", "2021", "2022", "2023", "2024"].map((ano) => (
               <TouchableOpacity key={ano} style={styles.botaoAno} onPress={() => buscarAno(ano)}>
-                <Text style={{color:"white"}}>{ano}</Text>
+                <Text style={{ color: "white" }}>{ano}</Text>
               </TouchableOpacity>
             ))}
           </View>
           <TouchableOpacity style={styles.botaoAnoAtual} onPress={() => buscarAno(anoAtual)}>
-            <Text style={{ textAlign: "center", color:"white" }}>{anoAtual}</Text>
+            <Text style={{ textAlign: "center", color: "white" }}>{anoAtual}</Text>
           </TouchableOpacity>
         </View>
 
@@ -92,9 +92,8 @@ export default function App() {
         <FlatList
           data={fotos}
           scrollEnabled={false}
-          numColumns={2}
           style={{ width: '100%' }}
-          contentContainerStyle={{ flex:1,justifyContent: 'center', alignItems: 'center', paddingBottom: 40 }}
+          contentContainerStyle={{justifyContent: 'center', flexDirection: 'row', flexWrap:"wrap" ,padding: 20, gap: 20}}
           keyExtractor={(item, index) => item.data?.[0]?.nasa_id || index.toString()}
           renderItem={({ item }) => {
             const imagem = item.links ? item.links[0].href : null
@@ -118,7 +117,7 @@ export default function App() {
 
 
 
-        {/* DESENVOLVEDORES */}
+        {/* FOOTER */}
         <View style={{ padding: 20 }}>
           <Text style={{ fontSize: 20, fontWeight: "bold", textAlign: "center" }}>Desenvolvedores</Text>
 
@@ -127,8 +126,8 @@ export default function App() {
               source={{ uri: "https://i.pravatar.cc/100" }}
               style={{ width: 80, height: 80, borderRadius: 40 }}
             />
-            <Text>Gabriel Oliveira do Santos Mazzoti</Text>
-            <Text style={{ color: "blue" }} onPress={() => Linking.openURL("https://linkedin.com")}>
+            <Text>Gabriel Oliveira do Santos Mazotti</Text>
+            <Text style={{ color: "blue" }} onPress={() => Linking.openURL("https://www.linkedin.com/in/gabriel-mazotti-2a40b8277/")}>
               LinkedIn
             </Text>
           </View>
@@ -165,16 +164,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  /* SEÇÕES */
-  fotosDiaTitulo: {
+ 
+ 
+
+  /* FOTOS DO DIA */
+   fotosDiaTitulo: {
     fontSize: 20,
     fontWeight: "600",
     marginTop: 20,
     marginLeft: "5%",
   },
-
-  /* FOTOS DO DIA */
-  scrollFotos: {
+  scrollFotosDia: {
     marginTop: 15,
     paddingLeft: "5%",
   },
@@ -187,11 +187,11 @@ const styles = StyleSheet.create({
     marginRight: 15,
     alignItems: "center",
     justifyContent: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
+    // elevation: 3,
+    // shadowColor: "#000",
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3,
+    // shadowOffset: { width: 0, height: 2 },
   },
   cardImagem: {
     height: "70%",
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   filtro: {
     marginTop: 20,
     paddingHorizontal: "5%",
-    paddingBottom: 40,
+    paddingBottom: 10,
     alignItems: "center",
     width: "100%",
   },
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   botaoAno: {
     width: "15%",
     padding: 12,
-    backgroundColor:"#007bff" ,
+    backgroundColor: "#007bff",
     borderRadius: 10,
     alignItems: "center",
   },
@@ -258,17 +258,17 @@ const styles = StyleSheet.create({
   },
 
   /* FOTOS*/
+  
   fotos: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
   },
-    cardFotos: {
-    marginBottom: 40,
-    marginRight:40,
+  cardFotos: {
+    marginBottom: 20,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   titulo: {
     marginTop: 10,
@@ -276,4 +276,5 @@ const styles = StyleSheet.create({
     width: 300,
     textAlign: "center"
   }
+  
 });
