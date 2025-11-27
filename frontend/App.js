@@ -1,21 +1,20 @@
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, TextInput, FlatList, Linking} from "react-native";
-import { useState } from 'react';
-import Header from "./components/Header";
-import FotosDoDia from "./components/FotosDia";
-import Busca from "./components/Busca";
-import FiltroAno from "./components/FiltrosAno";
-import Fotos from "./components/Fotos";
-import Footer from "./components/Footer";
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, TextInput, FlatList, Linking } from "react-native"
+import { useState, useEffect } from 'react'
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import Header from "./components/Header"
+import FotosDoDia from "./components/FotosDia"
+import Busca from "./components/Busca"
+import FiltroAno from "./components/FiltrosAno"
+import Fotos from "./components/Fotos"
+import Footer from "./components/Footer"
 
 
 export default function App() {
 
   const [busca, setBusca] = useState('')
   const [fotos, setFotos] = useState([])
-  const [historicoFotosDiaAtual, setHistoricoFotosDiaAtual] = useState([])
-  const anoAtual = new Date().getFullYear();
-
-
+  const [historicoFotosDia, setHistoricoFotosDia] = useState([])
+  const anoAtual = new Date().getFullYear()
 
   const buscar = async () => {
     if (busca === '') return
@@ -35,6 +34,59 @@ export default function App() {
   }
 
 
+  const gerarDataHoje = () => {
+  const hoje = new Date()
+  const ano = hoje.getFullYear()
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0")
+  const dia = String(hoje.getDate()).padStart(2, "0")
+
+  return `${ano}-${mes}-${dia}`
+}
+
+const formatarData = (data) => { 
+  const partes = data.split("-") 
+  const ano = partes[0] 
+  const mes = partes[1] 
+  const dia = partes[2] 
+  return dia + "/" + mes + "/" + ano 
+}
+
+
+const buscarFotoDoDia = async () => {
+  
+  const dataHoje = gerarDataHoje()
+
+  const salvo = await AsyncStorage.getItem("historico_apod")
+  let historico = salvo ? JSON.parse(salvo) : []
+
+ 
+  const existe = historico.find(item => item.data === dataHoje)
+  if (!existe) {
+    const resposta = await fetch(`http://localhost:3000/apod?date=${dataHoje}`)
+    const dado = await resposta.json()
+
+    historico.push({
+      data: dataHoje,
+      titulo: dado.title,
+      descricao: dado.explanation,
+      imagem: dado.url
+    })
+
+    
+    await AsyncStorage.setItem("historico_apod", JSON.stringify(historico))
+  }
+
+  
+  historico.sort((a, b) => new Date(b.data) - new Date(a.data))
+
+  setHistoricoFotosDia(historico)
+}
+
+useEffect(() => {
+  buscarFotoDoDia()
+}, [])
+
+
 
 
   return (
@@ -43,8 +95,8 @@ export default function App() {
       <View style={styles.main}>
 
         <Header />
-
-        <FotosDoDia fotos={historicoFotosDiaAtual} />
+       
+        <FotosDoDia historicoFotosDia={historicoFotosDia} formatarData={formatarData} />
 
         <Busca busca={busca} setBusca={setBusca} buscar={buscar} />
 
@@ -56,7 +108,7 @@ export default function App() {
 
       </View>
     </ScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -64,4 +116,4 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f2f2f2",
   }
-});
+})

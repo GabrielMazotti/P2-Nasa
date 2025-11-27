@@ -1,24 +1,25 @@
 import { View, Text, ScrollView, Image, StyleSheet } from "react-native";
 
-export default function FotosDoDia({ fotos }) {
+export default function FotosDoDia({ historicoFotosDia, formatarData }) {
   return (
     <>
+
       <Text style={styles.fotosDiaTitulo}>Fotos do Dia</Text>
       <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.fotosDiaTitulo}
-        >
-          {[1, 2, 3].map((i) => (
-            <View key={i} style={styles.cardFotosDia}>
-              <Image
-                source={{ uri: "https://reactnative.dev/docs/assets/p_cat2.png" }}
-                style={styles.cardImagem}
-              />
-              <Text style={styles.cardLabel}>Foto {i}</Text>
-            </View>
-          ))}
-        </ScrollView>
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.scrollFotosDia}
+      >
+        {historicoFotosDia.map((item, i) => (
+          <View key={i} style={styles.cardFotosDia}>
+            <Image
+              source={{ uri: item.imagem }}
+              style={styles.cardImagem}
+            />
+            <Text style={styles.cardLabel}>{formatarData(item.data)}</Text>
+          </View>
+        ))}
+      </ScrollView>
     </>
   );
 }
@@ -45,7 +46,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cardImagem: {
-    height: "70%",
+    height: "83%",
     width: "100%",
     borderRadius: 10,
   },

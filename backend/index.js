@@ -48,7 +48,7 @@ app.get('/search-year', async (req, res) => {
       year_end: ano,
       media_type: 'image'
     }
-  });
+  })
 
   const itemsLimitados = result.data.collection.items.slice(0, LIMITE_FOTOS)
   res.json({ items: itemsLimitados })
@@ -56,17 +56,21 @@ app.get('/search-year', async (req, res) => {
 
 
 app.get('/apod', async (req, res) => {
-  const nasa = axios.create({
-    baseURL: 'https://api.nasa.gov/planetary/'
-  })
+  const { date } = req.query
 
-  const result = await nasa.get('/apod', {
-    params: {
-      api_key: process.env.NASA_KEY
-    }
-  })
+ 
+    const nasa = axios.create({
+      baseURL: 'https://api.nasa.gov/planetary/'
+    })
 
-  res.json(result.data)
+    const result = await nasa.get('/apod', {
+      params: {
+        api_key: process.env.NASA_KEY,
+        date: date
+      }
+    })
+
+    res.json(result.data)
 })
 
 

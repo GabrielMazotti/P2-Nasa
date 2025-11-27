@@ -26,7 +26,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     marginTop: 20,
-    borderRadius: 10
+    borderRadius: 10,
+    backgroundColor: "white",
   },
   botaoBuscar: {
     marginTop: 10,
